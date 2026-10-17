@@ -83,15 +83,17 @@ RUN_MIGRATE=1 ./scripts/deploy-cluster.sh
 
 ## 功能与授权
 
+试运行友情价，方便先用起来；正式定价可能调整，以 [授权门户](https://www.abuai.chat/) 为准。
+
 | 版本 | 定位 | 部署模板 |
 |------|------|----------|
 | 个人版 | 永久免费；3 用户 / 5 渠道 / 10 令牌 / 1 实例 | `standalone/` |
-| 基础团队 | ¥99/月；10 用户 / 20 渠道 / 3 实例 | `standalone/` + `cluster/` |
-| 标准团队 | ¥299/月；20 用户 / 50 渠道 / 5 实例 | `standalone/` + `cluster/` |
-| 高级团队 | ¥599/月；50 用户 / 100 渠道 / 10 实例 | `standalone/` + `cluster/` |
+| 基础团队 | ¥9.9/月；10 用户 / 20 渠道 / 3 实例 | `standalone/` + `cluster/` |
+| 标准团队 | ¥29.9/月；20 用户 / 50 渠道 / 5 实例 | `standalone/` + `cluster/` |
+| 高级团队 | ¥59.9/月；50 用户 / 100 渠道 / 10 实例 | `standalone/` + `cluster/` |
 | 企业版 | 无限额度、SLA、定制与私有化 | 联系销售 |
 
-完整对照见 [FEATURES.md](./FEATURES.md)。
+需要我们帮忙部署上线：**代部署服务费 ¥100 / 次**（一次性）。详见 [FEATURES.md](./FEATURES.md)。
 
 ## 常用命令
 
