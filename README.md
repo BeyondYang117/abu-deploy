@@ -37,7 +37,14 @@ abu-deploy/
 - Standalone: ~2 CPU / 4 GB RAM (SQLite + Redis)
 - Small cluster: external MySQL; ~4 CPU / 8 GB+ RAM recommended; multi-instance capacity follows your license
 
-Default image: `abu116/abu-api:latest`
+## Images
+
+| Image | Contains | Use when |
+|-------|----------|----------|
+| `abu116/abu-api:latest` | Personal / core — **no Team edition** | Free Personal, single-host |
+| `abu116/abu-api-team:latest` | **Latest Team edition** | Team / Enterprise, multi-instance, `cluster/` |
+
+`standalone/` defaults to `abu-api`. `cluster/` defaults to `abu-api-team`. Override with `ABU_API_IMAGE`.
 
 ## Standalone (free)
 
@@ -88,13 +95,13 @@ Two fixed slaves (`abu-api-slave-1/2`) match `haproxy.cfg`. If you add/remove no
 
 Soft-launch / trial pricing — subject to change; see the [license portal](https://www.abuai.chat/).
 
-| Plan | Limits | Templates |
-|------|--------|-----------|
-| Personal | Free forever; 3 users / 5 channels / 10 tokens / 1 instance | `standalone/` |
-| Team Basic | ¥9.9/mo; 10 users / 20 channels / 3 instances | `standalone/` + `cluster/` |
-| Team Standard | ¥29.9/mo; 20 users / 50 channels / 5 instances | `standalone/` + `cluster/` |
-| Team Pro | ¥59.9/mo; 50 users / 100 channels / 10 instances | `standalone/` + `cluster/` |
-| Enterprise | Unlimited limits, SLA, custom & private deploy | Contact sales |
+| Plan | Limits | Image | Templates |
+|------|--------|-------|-----------|
+| Personal | Free forever; 3 users / 5 channels / 10 tokens / 1 instance | `abu-api` | `standalone/` |
+| Team Basic | ¥9.9/mo; 10 users / 20 channels / 3 instances | `abu-api-team` | `standalone/` + `cluster/` |
+| Team Standard | ¥29.9/mo; 20 users / 50 channels / 5 instances | `abu-api-team` | `standalone/` + `cluster/` |
+| Team Pro | ¥59.9/mo; 50 users / 100 channels / 10 instances | `abu-api-team` | `standalone/` + `cluster/` |
+| Enterprise | Unlimited limits, SLA, custom & private deploy | `abu-api-team` | Contact sales |
 
 Need help standing it up? **Assisted deploy: ¥100 one-time.** Details in [FEATURES.md](./FEATURES.md).
 
@@ -107,8 +114,9 @@ cd standalone && docker compose ps && docker compose logs -f abu-api
 # cluster
 cd cluster && docker compose ps && docker compose logs -f master
 
-# pin an image tag
+# pin an image tag (Personal vs Team channels are different)
 ABU_API_IMAGE=abu116/abu-api:vX.Y.Z docker compose up -d
+ABU_API_IMAGE=abu116/abu-api-team:vX.Y.Z docker compose up -d
 ```
 
 ## Security

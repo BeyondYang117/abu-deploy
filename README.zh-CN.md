@@ -37,7 +37,14 @@ abu-deploy/
 - 单机：约 2 CPU / 4 GB RAM（SQLite + Redis）
 - 小集群：外部 MySQL，建议 4 CPU / 8 GB+ RAM；多实例容量受授权约束
 
-默认镜像：`abu116/abu-api:latest`
+## 镜像说明
+
+| 镜像 | 内容 | 适用 |
+|------|------|------|
+| `abu116/abu-api:latest` | 个人/核心版，**不含团队版能力** | 免费个人版、单机 |
+| `abu116/abu-api-team:latest` | **团队版最新** | 团队/企业、多实例、`cluster/` |
+
+`standalone/` 默认 `abu-api`；`cluster/` 默认 `abu-api-team`。可用 `ABU_API_IMAGE` 覆盖。
 
 ## 单机免费部署
 
@@ -88,13 +95,13 @@ RUN_MIGRATE=1 ./scripts/deploy-cluster.sh
 
 试运行友情价，方便先用起来；正式定价可能调整，以 [授权门户](https://www.abuai.chat/) 为准。
 
-| 版本 | 定位 | 部署模板 |
-|------|------|----------|
-| 个人版 | 永久免费；3 用户 / 5 渠道 / 10 令牌 / 1 实例 | `standalone/` |
-| 基础团队 | ¥9.9/月；10 用户 / 20 渠道 / 3 实例 | `standalone/` + `cluster/` |
-| 标准团队 | ¥29.9/月；20 用户 / 50 渠道 / 5 实例 | `standalone/` + `cluster/` |
-| 高级团队 | ¥59.9/月；50 用户 / 100 渠道 / 10 实例 | `standalone/` + `cluster/` |
-| 企业版 | 无限额度、SLA、定制与私有化 | 联系销售 |
+| 版本 | 定位 | 镜像 | 部署模板 |
+|------|------|------|----------|
+| 个人版 | 永久免费；3 用户 / 5 渠道 / 10 令牌 / 1 实例 | `abu-api` | `standalone/` |
+| 基础团队 | ¥9.9/月；10 用户 / 20 渠道 / 3 实例 | `abu-api-team` | `standalone/` + `cluster/` |
+| 标准团队 | ¥29.9/月；20 用户 / 50 渠道 / 5 实例 | `abu-api-team` | `standalone/` + `cluster/` |
+| 高级团队 | ¥59.9/月；50 用户 / 100 渠道 / 10 实例 | `abu-api-team` | `standalone/` + `cluster/` |
+| 企业版 | 无限额度、SLA、定制与私有化 | `abu-api-team` | 联系销售 |
 
 需要我们帮忙部署上线：**代部署服务费 ¥100 / 次**（一次性）。详见 [FEATURES.md](./FEATURES.md)。
 
@@ -107,8 +114,9 @@ cd standalone && docker compose ps && docker compose logs -f abu-api
 # 小集群
 cd cluster && docker compose ps && docker compose logs -f master
 
-# 指定镜像版本
+# 指定镜像版本（个人版与团队版是两条镜像线）
 ABU_API_IMAGE=abu116/abu-api:vX.Y.Z docker compose up -d
+ABU_API_IMAGE=abu116/abu-api-team:vX.Y.Z docker compose up -d
 ```
 
 ## 安全建议
