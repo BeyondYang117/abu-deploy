@@ -80,6 +80,7 @@ Prefer these when you outgrow SQLite. Same app + Redis stack; only the DB change
 cd examples/mysql
 cp .env.example .env
 # set MYSQL_* passwords and keep SQL_DSN in sync
+# LICENSE_CODE may stay empty (Personal); set it for Team/Enterprise — see .env.example
 docker compose up -d
 curl http://127.0.0.1:3004/ready
 ```
@@ -92,6 +93,7 @@ DSN shape: `user:pass@tcp(mysql:3306)/abu_api?parseTime=true&interpolateParams=t
 cd examples/postgres
 cp .env.example .env
 # set POSTGRES_PASSWORD and keep SQL_DSN in sync
+# LICENSE_CODE may stay empty (Personal); set it for Team/Enterprise — see .env.example
 docker compose up -d
 curl http://127.0.0.1:3004/ready
 ```
@@ -99,6 +101,8 @@ curl http://127.0.0.1:3004/ready
 DSN **must** start with `postgres://` or `postgresql://` so Abu API selects PostgreSQL:
 
 `postgres://abu:pass@postgres:5432/abu_api?sslmode=disable`
+
+**License:** same as SQLite standalone — leave `LICENSE_CODE` empty for free Personal; for Team/Enterprise put the code from [abuai.chat](https://www.abuai.chat/) into `.env`, then `docker compose up -d`.
 
 Do not run `standalone/`, `examples/mysql/`, and `examples/postgres/` on the same host with the default `3004` bind at once — change the published port if you need multiple stacks.
 

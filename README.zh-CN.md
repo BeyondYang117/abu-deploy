@@ -80,6 +80,7 @@ SQLite 不够用时，可用以下样例（应用 + Redis 不变，仅数据库�
 cd examples/mysql
 cp .env.example .env
 # 修改 MYSQL_* 密码，并保持 SQL_DSN 一致
+# LICENSE_CODE 可留空（个人版）；团队/企业填授权码，见 .env.example 注释
 docker compose up -d
 curl http://127.0.0.1:3004/ready
 ```
@@ -92,6 +93,7 @@ DSN 格式：`user:pass@tcp(mysql:3306)/abu_api?parseTime=true&interpolateParams
 cd examples/postgres
 cp .env.example .env
 # 修改 POSTGRES_PASSWORD，并保持 SQL_DSN 一致
+# LICENSE_CODE 可留空（个人版）；团队/企业填授权码，见 .env.example 注释
 docker compose up -d
 curl http://127.0.0.1:3004/ready
 ```
@@ -99,6 +101,8 @@ curl http://127.0.0.1:3004/ready
 DSN **必须以** `postgres://` 或 `postgresql://` 开头，应用才会走 PostgreSQL：
 
 `postgres://abu:pass@postgres:5432/abu_api?sslmode=disable`
+
+**授权码：** 与单机 SQLite 相同——`LICENSE_CODE` 留空即免费个人版；升级到团队/企业时在 `.env` 填入门户颁发的码（[abuai.chat](https://www.abuai.chat/)），然后 `docker compose up -d` 即可生效。
 
 注意：`standalone/`、`examples/mysql/`、`examples/postgres/` 默认都占用本机 `3004`，同一台机器不要同时用默认端口启动多套。
 
