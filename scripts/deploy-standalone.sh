@@ -3,6 +3,9 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DIR="$ROOT/standalone"
+# shellcheck source=./_compose.sh
+source "$ROOT/scripts/_compose.sh"
+resolve_compose
 
 cd "$DIR"
 
@@ -11,8 +14,8 @@ if [[ ! -f .env ]]; then
   echo "Created standalone/.env from .env.example — edit secrets before production use."
 fi
 
-docker compose pull
-docker compose up -d
+"${COMPOSE[@]}" pull
+"${COMPOSE[@]}" up -d
 
 echo "Waiting for /ready ..."
 for _ in $(seq 1 60); do
@@ -23,5 +26,5 @@ for _ in $(seq 1 60); do
   sleep 2
 done
 
-echo "Timed out waiting for readiness. Check: docker compose -f $DIR/docker-compose.yml ps"
+echo "Timed out waiting for readiness. Check: ${COMPOSE[*]} -f $DIR/docker-compose.yml ps"
 exit 1

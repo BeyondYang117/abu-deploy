@@ -3,6 +3,9 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DIR="$ROOT/cluster"
+# shellcheck source=./_compose.sh
+source "$ROOT/scripts/_compose.sh"
+resolve_compose
 
 cd "$DIR"
 
@@ -14,11 +17,11 @@ fi
 
 # Optional one-shot schema migrate against the shared MySQL.
 if [[ "${RUN_MIGRATE:-0}" == "1" ]]; then
-  docker compose --profile tools run --rm migrate up
+  "${COMPOSE[@]}" --profile tools run --rm migrate up
 fi
 
-docker compose pull
-docker compose up -d
+"${COMPOSE[@]}" pull
+"${COMPOSE[@]}" up -d
 
 echo "Waiting for gateway /ready ..."
 for _ in $(seq 1 90); do
@@ -29,5 +32,5 @@ for _ in $(seq 1 90); do
   sleep 2
 done
 
-echo "Timed out waiting for readiness. Check: docker compose -f $DIR/docker-compose.yml ps"
+echo "Timed out waiting for readiness. Check: ${COMPOSE[*]} -f $DIR/docker-compose.yml ps"
 exit 1
