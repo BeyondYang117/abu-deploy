@@ -13,11 +13,19 @@ if [[ ! -f .env ]]; then
   cp .env.example .env
   echo "Created standalone/.env from .env.example — edit secrets before production use."
 fi
-# Compose V1 cannot parse image defaults with ':' — keep default in .env only.
-if ! grep -qE '^[[:space:]]*ABU_API_IMAGE=' .env; then
-  echo 'ABU_API_IMAGE=abu116/abu-api-team:latest' >> .env
-  echo "Added ABU_API_IMAGE=abu116/abu-api-team:latest to standalone/.env"
-fi
+
+# Merge missing keys from .env.example so upgrades stay Compose-V1-safe
+# (defaults must live in .env, not ${VAR:-...} in compose).
+while IFS= read -r line || [[ -n "$line" ]]; do
+  [[ "$line" =~ ^[[:space:]]*# ]] && continue
+  [[ "$line" =~ ^[[:space:]]*$ ]] && continue
+  key="${line%%=*}"
+  [[ -z "$key" || "$key" == "$line" ]] && continue
+  if ! grep -qE "^[[:space:]]*${key}=" .env; then
+    echo "$line" >> .env
+    echo "Added $key to standalone/.env from .env.example"
+  fi
+done < .env.example
 
 "${COMPOSE[@]}" pull
 "${COMPOSE[@]}" up -d
