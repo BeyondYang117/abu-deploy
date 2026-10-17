@@ -6,9 +6,13 @@
 data/
 logs/
 redis-data/
+mysql-data/
+postgres-data/
 **/data/
 **/logs/
 **/redis-data/
+**/mysql-data/
+**/postgres-data/
 
 *.log
 .DS_Store

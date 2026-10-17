@@ -23,8 +23,11 @@ Abu API 官方自托管部署模板。
 
 ```
 abu-deploy/
-├── standalone/          # 单机免费部署（推荐起步）
+├── standalone/          # 单机 + SQLite（推荐起步）
 ├── cluster/             # 小集群（1 master + N slaves + HAProxy）
+├── examples/
+│   ├── mysql/           # 单机 + MySQL 8
+│   └── postgres/        # 单机 + PostgreSQL 16
 ├── scripts/             # 一键启动脚本
 ├── FEATURES.md          # 功能与授权对照
 ├── README.md            # English
@@ -66,6 +69,38 @@ curl http://127.0.0.1:3004/ready
 默认使用 SQLite（`SQL_DSN=local`）。`LICENSE_CODE` 可留空。
 
 访问入口：`http://127.0.0.1:3004`（仅本机；生产请加反向代理）。
+
+## 数据库样例（MySQL / PostgreSQL）
+
+SQLite 不够用时，可用以下样例（应用 + Redis 不变，仅数据库不同）。
+
+### MySQL 8
+
+```bash
+cd examples/mysql
+cp .env.example .env
+# 修改 MYSQL_* 密码，并保持 SQL_DSN 一致
+docker compose up -d
+curl http://127.0.0.1:3004/ready
+```
+
+DSN 格式：`user:pass@tcp(mysql:3306)/abu_api?parseTime=true&interpolateParams=true`
+
+### PostgreSQL 16
+
+```bash
+cd examples/postgres
+cp .env.example .env
+# 修改 POSTGRES_PASSWORD，并保持 SQL_DSN 一致
+docker compose up -d
+curl http://127.0.0.1:3004/ready
+```
+
+DSN **必须以** `postgres://` 或 `postgresql://` 开头，应用才会走 PostgreSQL：
+
+`postgres://abu:pass@postgres:5432/abu_api?sslmode=disable`
+
+注意：`standalone/`、`examples/mysql/`、`examples/postgres/` 默认都占用本机 `3004`，同一台机器不要同时用默认端口启动多套。
 
 ## 小集群部署
 

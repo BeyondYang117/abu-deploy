@@ -23,8 +23,11 @@ Demo is for evaluation only — data may be reset. Do not store real secrets or 
 
 ```
 abu-deploy/
-├── standalone/          # single-host free deploy (start here)
+├── standalone/          # single-host + SQLite (start here)
 ├── cluster/             # small cluster (1 master + 2 slaves + HAProxy)
+├── examples/
+│   ├── mysql/           # single-host + MySQL 8
+│   └── postgres/        # single-host + PostgreSQL 16
 ├── scripts/             # one-shot helpers
 ├── FEATURES.md          # plans & assisted-deploy fee (zh)
 ├── README.md            # English
@@ -66,6 +69,38 @@ Or:
 Defaults to SQLite (`SQL_DSN=local`). `LICENSE_CODE` may be left empty.
 
 Entrypoint: `http://127.0.0.1:3004` (loopback only — put a reverse proxy in front for production).
+
+## Database samples (MySQL / PostgreSQL)
+
+Prefer these when you outgrow SQLite. Same app + Redis stack; only the DB changes.
+
+### MySQL 8
+
+```bash
+cd examples/mysql
+cp .env.example .env
+# set MYSQL_* passwords and keep SQL_DSN in sync
+docker compose up -d
+curl http://127.0.0.1:3004/ready
+```
+
+DSN shape: `user:pass@tcp(mysql:3306)/abu_api?parseTime=true&interpolateParams=true`
+
+### PostgreSQL 16
+
+```bash
+cd examples/postgres
+cp .env.example .env
+# set POSTGRES_PASSWORD and keep SQL_DSN in sync
+docker compose up -d
+curl http://127.0.0.1:3004/ready
+```
+
+DSN **must** start with `postgres://` or `postgresql://` so Abu API selects PostgreSQL:
+
+`postgres://abu:pass@postgres:5432/abu_api?sslmode=disable`
+
+Do not run `standalone/`, `examples/mysql/`, and `examples/postgres/` on the same host with the default `3004` bind at once — change the published port if you need multiple stacks.
 
 ## Small cluster
 

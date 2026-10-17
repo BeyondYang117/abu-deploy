@@ -1,0 +1,131 @@
+# Sample: Abu API + Redis + MySQL 8 on one host.
+#   cp .env.example .env
+#   docker compose up -d
+#   curl http://127.0.0.1:3004/ready
+
+services:
+  abu-api:
+    image: ${ABU_API_IMAGE:-abu116/abu-api-team:latest}
+    container_name: abu-api-mysql
+    restart: unless-stopped
+    stop_grace_period: 17m
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/ready || exit 1"]
+      interval: 10s
+      timeout: 6s
+      retries: 3
+      start_period: 120s
+    command: --log-dir /app/logs
+    ports:
+      - "127.0.0.1:3004:3000"
+    volumes:
+      - ./data:/data
+      - ./logs:/app/logs
+    environment:
+      GIN_MODE: release
+      TZ: ${TZ:-Asia/Shanghai}
+      SQL_DSN: ${SQL_DSN:?set SQL_DSN for MySQL}
+      DB_MIGRATION_MODE: ${DB_MIGRATION_MODE:-auto}
+      REDIS_CONN_STRING: redis://:${REDIS_PASSWORD}@redis:6379/0
+      COORDINATION_REDIS_CONN_STRING: redis://:${REDIS_PASSWORD}@redis-coordination:6379/0
+      SESSION_SECRET: ${SESSION_SECRET:?set SESSION_SECRET}
+      CRYPTO_SECRET: ${CRYPTO_SECRET:?set CRYPTO_SECRET}
+      CARD_ENCRYPTION_KEY: ${CARD_ENCRYPTION_KEY:?set CARD_ENCRYPTION_KEY}
+      LICENSE_CODE: ${LICENSE_CODE:-}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3004}
+      TRUSTED_PROXY_CIDRS: 127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
+      MEMORY_CACHE_ENABLED: "true"
+      BATCH_UPDATE_ENABLED: "true"
+      SHUTDOWN_TIMEOUT_SECONDS: 930
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      redis-coordination:
+        condition: service_healthy
+    networks:
+      - abu-net
+
+  migrate:
+    image: ${ABU_API_IMAGE:-abu116/abu-api-team:latest}
+    profiles: ["tools"]
+    restart: "no"
+    environment:
+      SQL_DSN: ${SQL_DSN:?set SQL_DSN}
+      TZ: ${TZ:-Asia/Shanghai}
+    entrypoint: ["/abu-db-migrate"]
+    networks:
+      - abu-net
+
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-abu_api}
+      MYSQL_USER: ${MYSQL_USER:-abu}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?set MYSQL_PASSWORD}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=caching_sha2_password
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    networks:
+      - abu-net
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    environment:
+      REDISCLI_AUTH: ${REDIS_PASSWORD:?set REDIS_PASSWORD}
+    command: >
+      redis-server
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - ./redis-data:/data
+    networks:
+      - abu-net
+
+  redis-coordination:
+    image: redis:7-alpine
+    restart: unless-stopped
+    environment:
+      REDISCLI_AUTH: ${REDIS_PASSWORD:?set REDIS_PASSWORD}
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy noeviction
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - coordination-data:/data
+    networks:
+      - abu-net
+
+volumes:
+  coordination-data:
+
+networks:
+  abu-net:
+    driver: bridge
