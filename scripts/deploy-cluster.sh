@@ -14,6 +14,11 @@ if [[ ! -f .env ]]; then
   echo "Created cluster/.env from .env.example — set SQL_DSN (MySQL) and secrets first."
   exit 1
 fi
+# Compose V1 cannot parse image defaults with ':' — keep default in .env only.
+if ! grep -qE '^[[:space:]]*ABU_API_IMAGE=' .env; then
+  echo 'ABU_API_IMAGE=abu116/abu-api-team:latest' >> .env
+  echo "Added ABU_API_IMAGE=abu116/abu-api-team:latest to cluster/.env"
+fi
 
 # Optional one-shot schema migrate against the shared MySQL.
 if [[ "${RUN_MIGRATE:-0}" == "1" ]]; then

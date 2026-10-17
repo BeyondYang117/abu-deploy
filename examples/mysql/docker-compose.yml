@@ -5,7 +5,8 @@
 
 services:
   abu-api:
-    image: ${ABU_API_IMAGE:-abu116/abu-api-team:latest}
+    # Default lives in .env (Compose V1 breaks on ${VAR:-repo:tag} because of ':').
+    image: ${ABU_API_IMAGE}
     container_name: abu-api-mysql
     restart: unless-stopped
     stop_grace_period: 17m
@@ -48,7 +49,8 @@ services:
       - abu-net
 
   migrate:
-    image: ${ABU_API_IMAGE:-abu116/abu-api-team:latest}
+    # Default lives in .env (Compose V1 breaks on ${VAR:-repo:tag} because of ':').
+    image: ${ABU_API_IMAGE}
     profiles: ["tools"]
     restart: "no"
     environment:

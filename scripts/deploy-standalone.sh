@@ -13,6 +13,11 @@ if [[ ! -f .env ]]; then
   cp .env.example .env
   echo "Created standalone/.env from .env.example — edit secrets before production use."
 fi
+# Compose V1 cannot parse image defaults with ':' — keep default in .env only.
+if ! grep -qE '^[[:space:]]*ABU_API_IMAGE=' .env; then
+  echo 'ABU_API_IMAGE=abu116/abu-api-team:latest' >> .env
+  echo "Added ABU_API_IMAGE=abu116/abu-api-team:latest to standalone/.env"
+fi
 
 "${COMPOSE[@]}" pull
 "${COMPOSE[@]}" up -d

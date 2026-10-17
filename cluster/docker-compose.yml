@@ -7,7 +7,8 @@
 #   curl http://127.0.0.1:8004/ready
 
 x-abu-slave: &abu-slave
-  image: ${ABU_API_IMAGE:-abu116/abu-api-team:latest}
+  # Default lives in .env (Compose V1 breaks on ${VAR:-repo:tag} because of ':').
+  image: ${ABU_API_IMAGE}
   restart: unless-stopped
   stop_grace_period: 17m
   environment: &abu-slave-env
@@ -56,7 +57,7 @@ x-abu-slave: &abu-slave
 
 services:
   master:
-    image: ${ABU_API_IMAGE:-abu116/abu-api-team:latest}
+    image: ${ABU_API_IMAGE}
     container_name: abu-api-master
     expose:
       - "3000"
@@ -131,7 +132,7 @@ services:
           - abu-api-slave-2
 
   migrate:
-    image: ${ABU_API_IMAGE:-abu116/abu-api-team:latest}
+    image: ${ABU_API_IMAGE}
     profiles: ["tools"]
     restart: "no"
     environment:
