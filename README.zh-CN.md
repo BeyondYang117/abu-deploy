@@ -68,7 +68,7 @@ curl http://127.0.0.1:8003/ready
 
 默认使用 SQLite（`SQL_DSN=local`）。`LICENSE_CODE` 可留空。
 
-访问入口：`http://<服务器IP>:8003`（默认监听全网卡 `8003`，云厂商安全组需放行 TCP 8003）。浏览器跨域请在 `.env` 的 `ALLOWED_ORIGINS` 中加上你的公网地址。HTTPS / 域名仍建议加反向代理。
+访问入口：`http://<服务器IP>:8003`（默认监听全网卡 `8003`，云厂商安全组需放行 TCP 8003）。HTTP 直连时保持 `SESSION_COOKIE_SECURE=false`，否则登录后 Cookie 会被浏览器丢弃并退回登录页；上 HTTPS 后改为 `true`。浏览器跨域请在 `ALLOWED_ORIGINS` 加上公网地址。
 
 ## 数据库样例（MySQL / PostgreSQL）
 

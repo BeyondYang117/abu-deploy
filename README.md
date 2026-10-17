@@ -68,7 +68,7 @@ Or:
 
 Defaults to SQLite (`SQL_DSN=local`). `LICENSE_CODE` may be left empty.
 
-Entrypoint: `http://<host-ip>:8003` (publishes `8003` on all interfaces — open TCP 8003 in the cloud security group). Add your public origin to `ALLOWED_ORIGINS` in `.env` for browser CORS. Prefer a reverse proxy when you need HTTPS / a custom domain.
+Entrypoint: `http://<host-ip>:8003` (publishes `8003` on all interfaces — open TCP 8003 in the cloud security group). Keep `SESSION_COOKIE_SECURE=false` for plain HTTP, or login cookies are dropped and you bounce back to `/login`; set `true` only behind HTTPS. Add your public origin to `ALLOWED_ORIGINS` for browser CORS.
 
 ## Database samples (MySQL / PostgreSQL)
 
