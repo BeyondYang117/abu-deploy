@@ -57,7 +57,7 @@ cd abu-deploy/standalone
 cp .env.example .env
 # set REDIS_PASSWORD / SESSION_SECRET / CRYPTO_SECRET / CARD_ENCRYPTION_KEY
 docker compose up -d
-curl http://127.0.0.1:3004/ready
+curl http://127.0.0.1:8003/ready
 ```
 
 Or:
@@ -68,7 +68,7 @@ Or:
 
 Defaults to SQLite (`SQL_DSN=local`). `LICENSE_CODE` may be left empty.
 
-Entrypoint: `http://127.0.0.1:3004` (loopback only — put a reverse proxy in front for production).
+Entrypoint: `http://<host-ip>:8003` (publishes `8003` on all interfaces — open TCP 8003 in the cloud security group). Add your public origin to `ALLOWED_ORIGINS` in `.env` for browser CORS. Prefer a reverse proxy when you need HTTPS / a custom domain.
 
 ## Database samples (MySQL / PostgreSQL)
 
@@ -104,7 +104,7 @@ DSN **must** start with `postgres://` or `postgresql://` so Abu API selects Post
 
 **License:** same as SQLite standalone — leave `LICENSE_CODE` empty for free Personal; for Team/Enterprise put the code from [abuai.chat](https://www.abuai.chat/) into `.env`, then `docker compose up -d`.
 
-Do not run `standalone/`, `examples/mysql/`, and `examples/postgres/` on the same host with the default `3004` bind at once — change the published port if you need multiple stacks.
+`standalone/` defaults to host port `8003`; `examples/mysql/` and `examples/postgres/` still default to loopback `3004`. Do not start multiple stacks with conflicting published ports on one host.
 
 ## Small cluster
 

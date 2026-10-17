@@ -57,7 +57,7 @@ cd abu-deploy/standalone
 cp .env.example .env
 # 至少修改 REDIS_PASSWORD / SESSION_SECRET / CRYPTO_SECRET / CARD_ENCRYPTION_KEY
 docker compose up -d
-curl http://127.0.0.1:3004/ready
+curl http://127.0.0.1:8003/ready
 ```
 
 或：
@@ -68,7 +68,7 @@ curl http://127.0.0.1:3004/ready
 
 默认使用 SQLite（`SQL_DSN=local`）。`LICENSE_CODE` 可留空。
 
-访问入口：`http://127.0.0.1:3004`（仅本机；生产请加反向代理）。
+访问入口：`http://<服务器IP>:8003`（默认监听全网卡 `8003`，云厂商安全组需放行 TCP 8003）。浏览器跨域请在 `.env` 的 `ALLOWED_ORIGINS` 中加上你的公网地址。HTTPS / 域名仍建议加反向代理。
 
 ## 数据库样例（MySQL / PostgreSQL）
 
@@ -104,7 +104,7 @@ DSN **必须以** `postgres://` 或 `postgresql://` 开头，应用才会走 Pos
 
 **授权码：** 与单机 SQLite 相同——`LICENSE_CODE` 留空即免费个人版；升级到团队/企业时在 `.env` 填入门户颁发的码（[abuai.chat](https://www.abuai.chat/)），然后 `docker compose up -d` 即可生效。
 
-注意：`standalone/`、`examples/mysql/`、`examples/postgres/` 默认都占用本机 `3004`，同一台机器不要同时用默认端口启动多套。
+注意：`standalone/` 默认占用 `8003`；`examples/mysql/`、`examples/postgres/` 默认占用本机 `3004`。同一台机器不要用冲突端口同时启动多套。
 
 ## 小集群部署
 

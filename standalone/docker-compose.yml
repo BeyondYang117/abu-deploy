@@ -2,7 +2,9 @@
 # Usage:
 #   cp .env.example .env
 #   docker compose up -d
-#   curl http://127.0.0.1:3004/ready
+#   curl http://127.0.0.1:8003/ready
+# Publishes 8003 on all interfaces so the host can be reached without a reverse proxy.
+# Open cloud firewall / security-group TCP 8003 if you need internet access.
 
 services:
   abu-api:
@@ -19,7 +21,7 @@ services:
       start_period: 120s
     command: --log-dir /app/logs
     ports:
-      - "127.0.0.1:3004:3000"
+      - "8003:3000"
     volumes:
       - ./data:/data
       - ./logs:/app/logs
@@ -35,7 +37,7 @@ services:
       CRYPTO_SECRET: ${CRYPTO_SECRET:?set CRYPTO_SECRET}
       CARD_ENCRYPTION_KEY: ${CARD_ENCRYPTION_KEY:?set CARD_ENCRYPTION_KEY}
       LICENSE_CODE: ${LICENSE_CODE:-}
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3004}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8003}
       TRUSTED_PROXY_CIDRS: 127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
       MEMORY_CACHE_ENABLED: "true"
       BATCH_UPDATE_ENABLED: "true"

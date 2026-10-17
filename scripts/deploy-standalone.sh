@@ -24,8 +24,8 @@ fi
 
 echo "Waiting for /ready ..."
 for _ in $(seq 1 60); do
-  if curl -fsS "http://127.0.0.1:3004/ready" >/dev/null 2>&1; then
-    echo "Standalone is ready: http://127.0.0.1:3004"
+  if curl -fsS "http://127.0.0.1:8003/ready" >/dev/null 2>&1; then
+    echo "Standalone is ready: http://127.0.0.1:8003 (LAN/public: http://<host-ip>:8003)"
     exit 0
   fi
   sleep 2
