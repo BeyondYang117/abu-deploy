@@ -1,0 +1,119 @@
+# Single-host free deploy (Personal edition / built-in free license).
+# Usage:
+#   cp .env.example .env
+#   docker compose up -d
+#   curl http://127.0.0.1:3004/ready
+
+services:
+  abu-api:
+    image: ${ABU_API_IMAGE:-abu116/abu-api:latest}
+    container_name: abu-api
+    restart: unless-stopped
+    stop_grace_period: 17m
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/ready || exit 1"]
+      interval: 10s
+      timeout: 6s
+      retries: 3
+      start_period: 120s
+    command: --log-dir /app/logs
+    ports:
+      - "127.0.0.1:3004:3000"
+    volumes:
+      - ./data:/data
+      - ./logs:/app/logs
+    environment:
+      GIN_MODE: release
+      TZ: ${TZ:-Asia/Shanghai}
+      SQL_DSN: ${SQL_DSN:-local}
+      SQLITE_PATH: ${SQLITE_PATH:-/data/abu-api.db}
+      DB_MIGRATION_MODE: ${DB_MIGRATION_MODE:-auto}
+      REDIS_CONN_STRING: redis://:${REDIS_PASSWORD}@redis:6379/0
+      COORDINATION_REDIS_CONN_STRING: redis://:${REDIS_PASSWORD}@redis-coordination:6379/0
+      SESSION_SECRET: ${SESSION_SECRET:?set SESSION_SECRET}
+      CRYPTO_SECRET: ${CRYPTO_SECRET:?set CRYPTO_SECRET}
+      CARD_ENCRYPTION_KEY: ${CARD_ENCRYPTION_KEY:?set CARD_ENCRYPTION_KEY}
+      LICENSE_CODE: ${LICENSE_CODE:-}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3004}
+      TRUSTED_PROXY_CIDRS: 127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
+      MEMORY_CACHE_ENABLED: "true"
+      BATCH_UPDATE_ENABLED: "true"
+      SHUTDOWN_TIMEOUT_SECONDS: 930
+      MODEL_ADMISSION_ENABLE: ${MODEL_ADMISSION_ENABLE:-true}
+      MODEL_ADMISSION_CONCURRENCY: ${MODEL_ADMISSION_CONCURRENCY:-64}
+      MODEL_ADMISSION_IMAGE_CONCURRENCY: ${MODEL_ADMISSION_IMAGE_CONCURRENCY:-16}
+      MODEL_ADMISSION_QUEUE_SIZE: ${MODEL_ADMISSION_QUEUE_SIZE:-256}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      redis:
+        condition: service_healthy
+      redis-coordination:
+        condition: service_healthy
+    networks:
+      - abu-net
+
+  migrate:
+    image: ${ABU_API_IMAGE:-abu116/abu-api:latest}
+    profiles: ["tools"]
+    restart: "no"
+    environment:
+      SQL_DSN: ${SQL_DSN:-local}
+      SQLITE_PATH: ${SQLITE_PATH:-/data/abu-api.db}
+      TZ: ${TZ:-Asia/Shanghai}
+    volumes:
+      - ./data:/data
+    entrypoint: ["/abu-db-migrate"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - abu-net
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    environment:
+      REDISCLI_AUTH: ${REDIS_PASSWORD:?set REDIS_PASSWORD}
+    command: >
+      redis-server
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - ./redis-data:/data
+    networks:
+      - abu-net
+
+  redis-coordination:
+    image: redis:7-alpine
+    restart: unless-stopped
+    environment:
+      REDISCLI_AUTH: ${REDIS_PASSWORD:?set REDIS_PASSWORD}
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy noeviction
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - coordination-data:/data
+    networks:
+      - abu-net
+
+volumes:
+  coordination-data:
+
+networks:
+  abu-net:
+    driver: bridge

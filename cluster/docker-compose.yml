@@ -1,0 +1,215 @@
+# Small cluster on one host: 1 master + 2 slaves + Redis + HAProxy.
+# Requires external MySQL (see .env.example).
+# Multi-instance capacity is gated by license; Personal edition is single-instance oriented.
+#
+#   cp .env.example .env
+#   docker compose up -d
+#   curl http://127.0.0.1:8004/ready
+
+x-abu-slave: &abu-slave
+  image: ${ABU_API_IMAGE:-abu116/abu-api:latest}
+  restart: unless-stopped
+  stop_grace_period: 17m
+  environment: &abu-slave-env
+    DB_MIGRATION_MODE: verify
+    NODE_TYPE: slave
+    BACKGROUND_TASKS_ENABLED: "false"
+    GIN_MODE: release
+    TZ: ${TZ:-Asia/Shanghai}
+    LOG_DIR: /app/logs
+    SQL_DSN: ${SQL_DSN:?set SQL_DSN to external MySQL}
+    LOG_SQL_DSN: ${LOG_SQL_DSN:-}
+    SQL_MAX_OPEN_CONNS: ${SQL_MAX_OPEN_CONNS:-200}
+    SQL_MAX_IDLE_CONNS: ${SQL_MAX_IDLE_CONNS:-50}
+    REDIS_CONN_STRING: ${REDIS_CONN_STRING:?set REDIS_CONN_STRING}
+    COORDINATION_REDIS_CONN_STRING: ${COORDINATION_REDIS_CONN_STRING:?set COORDINATION_REDIS_CONN_STRING}
+    SESSION_SECRET: ${SESSION_SECRET:?set SESSION_SECRET}
+    CRYPTO_SECRET: ${CRYPTO_SECRET:?set CRYPTO_SECRET}
+    CARD_ENCRYPTION_KEY: ${CARD_ENCRYPTION_KEY:?set CARD_ENCRYPTION_KEY}
+    LICENSE_CODE: ${LICENSE_CODE:-}
+    ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8004}
+    TRUSTED_PROXY_CIDRS: 127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
+    MEMORY_CACHE_ENABLED: "true"
+    MODEL_ADMISSION_ENABLE: "true"
+    MODEL_ADMISSION_CONCURRENCY: 256
+    MODEL_ADMISSION_IMAGE_CONCURRENCY: 64
+    SHUTDOWN_TIMEOUT_SECONDS: 930
+  volumes:
+    - slave-data:/data
+    - ./logs/slave:/app/logs
+  healthcheck:
+    test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/ready || exit 1"]
+    interval: 10s
+    timeout: 6s
+    retries: 3
+    start_period: 120s
+  depends_on:
+    redis:
+      condition: service_healthy
+    redis-coordination:
+      condition: service_healthy
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+  networks:
+    abu-net:
+      aliases: []
+
+services:
+  master:
+    image: ${ABU_API_IMAGE:-abu116/abu-api:latest}
+    container_name: abu-api-master
+    expose:
+      - "3000"
+    restart: unless-stopped
+    stop_grace_period: 17m
+    environment:
+      DB_MIGRATION_MODE: verify
+      NODE_TYPE: master
+      NODE_NAME: master-1
+      BACKGROUND_TASKS_ENABLED: "true"
+      GIN_MODE: release
+      TZ: ${TZ:-Asia/Shanghai}
+      LOG_DIR: /app/logs
+      SQL_DSN: ${SQL_DSN:?set SQL_DSN to external MySQL}
+      LOG_SQL_DSN: ${LOG_SQL_DSN:-}
+      SQL_MAX_OPEN_CONNS: ${SQL_MAX_OPEN_CONNS:-150}
+      SQL_MAX_IDLE_CONNS: ${SQL_MAX_IDLE_CONNS:-40}
+      REDIS_CONN_STRING: ${REDIS_CONN_STRING:?set REDIS_CONN_STRING}
+      COORDINATION_REDIS_CONN_STRING: ${COORDINATION_REDIS_CONN_STRING:?set COORDINATION_REDIS_CONN_STRING}
+      SESSION_SECRET: ${SESSION_SECRET:?set SESSION_SECRET}
+      CRYPTO_SECRET: ${CRYPTO_SECRET:?set CRYPTO_SECRET}
+      CARD_ENCRYPTION_KEY: ${CARD_ENCRYPTION_KEY:?set CARD_ENCRYPTION_KEY}
+      LICENSE_CODE: ${LICENSE_CODE:-}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8004}
+      TRUSTED_PROXY_CIDRS: 127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
+      MEMORY_CACHE_ENABLED: "true"
+      BATCH_UPDATE_ENABLED: "true"
+      MODEL_ADMISSION_ENABLE: "true"
+      MODEL_ADMISSION_CONCURRENCY: 64
+      MODEL_ADMISSION_IMAGE_CONCURRENCY: 16
+      SHUTDOWN_TIMEOUT_SECONDS: 930
+    volumes:
+      - master-data:/data
+      - ./logs/master:/app/logs
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/ready || exit 1"]
+      interval: 10s
+      timeout: 6s
+      retries: 3
+      start_period: 120s
+    depends_on:
+      redis:
+        condition: service_healthy
+      redis-coordination:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - abu-net
+
+  # Explicit slaves keep stable DNS names for HAProxy (abu-api-slave-1/2).
+  slave-1:
+    <<: *abu-slave
+    container_name: abu-api-slave-1
+    environment:
+      <<: *abu-slave-env
+      NODE_NAME: slave-1
+    networks:
+      abu-net:
+        aliases:
+          - abu-api-slave-1
+
+  slave-2:
+    <<: *abu-slave
+    container_name: abu-api-slave-2
+    environment:
+      <<: *abu-slave-env
+      NODE_NAME: slave-2
+    networks:
+      abu-net:
+        aliases:
+          - abu-api-slave-2
+
+  migrate:
+    image: ${ABU_API_IMAGE:-abu116/abu-api:latest}
+    profiles: ["tools"]
+    restart: "no"
+    environment:
+      SQL_DSN: ${SQL_DSN:?set SQL_DSN}
+      LOG_SQL_DSN: ${LOG_SQL_DSN:-}
+      TZ: ${TZ:-Asia/Shanghai}
+    entrypoint: ["/abu-db-migrate"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - abu-net
+
+  gateway:
+    image: haproxy:3.0-alpine
+    container_name: abu-haproxy-gateway
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8004:3000"
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      master:
+        condition: service_healthy
+      slave-1:
+        condition: service_healthy
+      slave-2:
+        condition: service_healthy
+    stop_grace_period: 17m
+    networks:
+      - abu-net
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    environment:
+      REDISCLI_AUTH: ${REDIS_PASSWORD:?set REDIS_PASSWORD}
+    command: >
+      redis-server
+      --maxmemory 1gb
+      --maxmemory-policy allkeys-lru
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - ./redis-data:/data
+    networks:
+      - abu-net
+
+  redis-coordination:
+    image: redis:7-alpine
+    restart: unless-stopped
+    environment:
+      REDISCLI_AUTH: ${REDIS_PASSWORD:?set REDIS_PASSWORD}
+    command: >
+      redis-server
+      --maxmemory 512mb
+      --maxmemory-policy noeviction
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - coordination-data:/data
+    networks:
+      - abu-net
+
+volumes:
+  master-data:
+  slave-data:
+  coordination-data:
+
+networks:
+  abu-net:
+    driver: bridge
