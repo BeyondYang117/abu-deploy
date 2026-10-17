@@ -18,3 +18,4 @@ postgres-data/
 .DS_Store
 .idea/
 .vscode/
+.tools/

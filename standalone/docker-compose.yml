@@ -8,7 +8,7 @@
 #
 # Note: use plain ${VAR} only — old docker-compose (Ubuntu Focal apt) rejects
 # ${VAR:-default} / ${VAR:?err} interpolation.
-# Keep `version` so Compose V1 does not parse this as legacy format-1.
+# `version` kept for broader tooling; deploy scripts require Compose V2.
 
 version: "3.8"
 
