@@ -8,6 +8,9 @@
 #
 # Note: use plain ${VAR} only — old docker-compose (Ubuntu Focal apt) rejects
 # ${VAR:-default} / ${VAR:?err} interpolation.
+# Keep `version` so Compose V1 does not parse this as legacy format-1.
+
+version: "3.8"
 
 services:
   abu-api:
