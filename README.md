@@ -41,10 +41,10 @@ abu-deploy/
 
 | Image | Contains | Use when |
 |-------|----------|----------|
-| `abu116/abu-api:latest` | Personal / core — **no Team edition** | Free Personal, single-host |
-| `abu116/abu-api-team:latest` | **Latest Team edition** | Team / Enterprise, multi-instance, `cluster/` |
+| `abu116/abu-api-team:latest` | **Latest** (includes Team edition) | **Default** for standalone & cluster |
+| `abu116/abu-api:latest` | Personal / core — **no Team edition** | Only if you explicitly want the non-Team channel |
 
-`standalone/` defaults to `abu-api`. `cluster/` defaults to `abu-api-team`. Override with `ABU_API_IMAGE`.
+Both templates default to `abu-api-team`. Free Personal still works with `LICENSE_CODE` empty; Team limits unlock after you set a Team license. Override with `ABU_API_IMAGE` if needed.
 
 ## Standalone (free)
 
@@ -97,7 +97,7 @@ Soft-launch / trial pricing — subject to change; see the [license portal](http
 
 | Plan | Limits | Image | Templates |
 |------|--------|-------|-----------|
-| Personal | Free forever; 3 users / 5 channels / 10 tokens / 1 instance | `abu-api` | `standalone/` |
+| Personal | Free forever; 3 users / 5 channels / 10 tokens / 1 instance | `abu-api-team` (default) or `abu-api` | `standalone/` |
 | Team Basic | ¥9.9/mo; 10 users / 20 channels / 3 instances | `abu-api-team` | `standalone/` + `cluster/` |
 | Team Standard | ¥29.9/mo; 20 users / 50 channels / 5 instances | `abu-api-team` | `standalone/` + `cluster/` |
 | Team Pro | ¥59.9/mo; 50 users / 100 channels / 10 instances | `abu-api-team` | `standalone/` + `cluster/` |

@@ -6,7 +6,7 @@
 
 services:
   abu-api:
-    image: ${ABU_API_IMAGE:-abu116/abu-api:latest}
+    image: ${ABU_API_IMAGE:-abu116/abu-api-team:latest}
     container_name: abu-api
     restart: unless-stopped
     stop_grace_period: 17m
@@ -54,7 +54,7 @@ services:
       - abu-net
 
   migrate:
-    image: ${ABU_API_IMAGE:-abu116/abu-api:latest}
+    image: ${ABU_API_IMAGE:-abu116/abu-api-team:latest}
     profiles: ["tools"]
     restart: "no"
     environment:

@@ -15,7 +15,7 @@
 | 价格 | 永久免费 | 见下表（试运行） | 定制报价 |
 | 功能范围 | 基础功能 | 完整功能 | 完整功能 + 定制 |
 | 部署模板 | `standalone/` | `standalone/` + `cluster/` | 私有化 / 定制 |
-| 镜像 | `abu116/abu-api` | `abu116/abu-api-team` | `abu116/abu-api-team` |
+| 镜像 | 默认 `abu-api-team`（也可用 `abu-api`） | `abu116/abu-api-team` | `abu116/abu-api-team` |
 | 支持 | 社区支持 | 邮件 / 工单 / 专属（按档） | 专属支持 + SLA |
 | 定制开发 | — | — | 支持 |
 

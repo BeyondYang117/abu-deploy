@@ -41,10 +41,10 @@ abu-deploy/
 
 | 镜像 | 内容 | 适用 |
 |------|------|------|
-| `abu116/abu-api:latest` | 个人/核心版，**不含团队版能力** | 免费个人版、单机 |
-| `abu116/abu-api-team:latest` | **团队版最新** | 团队/企业、多实例、`cluster/` |
+| `abu116/abu-api-team:latest` | **最新版**（含团队版能力） | **默认**：单机与小集群均用此镜像 |
+| `abu116/abu-api:latest` | 个人/核心版，**不含团队版能力** | 仅在明确只要非团队镜像线时使用 |
 
-`standalone/` 默认 `abu-api`；`cluster/` 默认 `abu-api-team`。可用 `ABU_API_IMAGE` 覆盖。
+`standalone/` 与 `cluster/` 默认均为 `abu-api-team`。个人版仍可 `LICENSE_CODE` 留空免费使用；升级团队授权后解锁更高额度。可用 `ABU_API_IMAGE` 覆盖。
 
 ## 单机免费部署
 
@@ -97,7 +97,7 @@ RUN_MIGRATE=1 ./scripts/deploy-cluster.sh
 
 | 版本 | 定位 | 镜像 | 部署模板 |
 |------|------|------|----------|
-| 个人版 | 永久免费；3 用户 / 5 渠道 / 10 令牌 / 1 实例 | `abu-api` | `standalone/` |
+| 个人版 | 永久免费；3 用户 / 5 渠道 / 10 令牌 / 1 实例 | `abu-api-team`（默认）或 `abu-api` | `standalone/` |
 | 基础团队 | ¥9.9/月；10 用户 / 20 渠道 / 3 实例 | `abu-api-team` | `standalone/` + `cluster/` |
 | 标准团队 | ¥29.9/月；20 用户 / 50 渠道 / 5 实例 | `abu-api-team` | `standalone/` + `cluster/` |
 | 高级团队 | ¥59.9/月；50 用户 / 100 渠道 / 10 实例 | `abu-api-team` | `standalone/` + `cluster/` |
