@@ -14,7 +14,7 @@ License portal: [https://www.abuai.chat/](https://www.abuai.chat/)
 
 | | URL | Notes |
 |--|-----|--------|
-| Demo | [http://129.213.115.171:8003/](http://129.213.115.171:8003/) | `admin` / `abuai@111111` |
+| Demo | [http://129.213.115.171:8003/](http://129.213.115.171:8003/) | `test1` / `abuai@111111` |
 | Production | [https://api.abusz.com/](https://api.abusz.com/) | Live site |
 
 Demo is for evaluation only — data may be reset. Do not store real secrets or production workloads there.
