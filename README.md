@@ -1,127 +1,130 @@
 # abu-deploy
 
-Abu API 官方自托管部署模板。
+English | [简体中文](./README.zh-CN.md)
 
-- 镜像公开可拉取，**无需授权码即可部署**（内置免费个人版）
-- 需要更高额度或企业能力时，再申请授权升级
-- 本仓库开源部署配置与脚本；应用能力边界见 [FEATURES.md](./FEATURES.md)
+Official self-host deploy templates for **Abu API**.
 
-授权门户：[https://www.abuai.chat/](https://www.abuai.chat/)
+- Public images — **deploy without a license code** (built-in free Personal plan)
+- Upgrade when you need higher limits or enterprise capabilities
+- This repo opens the Compose stacks and scripts; limits are documented in [FEATURES.md](./FEATURES.md) (Chinese detail table)
 
-## 在线演示与正式站点
+License portal: [https://www.abuai.chat/](https://www.abuai.chat/)
 
-| | 地址 | 说明 |
-|--|------|------|
-| 演示站 | [http://129.213.115.171:8003/](http://129.213.115.171:8003/) | 账号 `admin` / 密码 `abuai@111111` |
-| 正式站 | [https://api.abusz.com/](https://api.abusz.com/) | 生产环境 |
+## Demo & production
 
-演示站仅供体验，数据可能被重置；请勿存放真实密钥或生产业务数据。
+| | URL | Notes |
+|--|-----|--------|
+| Demo | [http://129.213.115.171:8003/](http://129.213.115.171:8003/) | `admin` / `abuai@111111` |
+| Production | [https://api.abusz.com/](https://api.abusz.com/) | Live site |
 
-## 目录
+Demo is for evaluation only — data may be reset. Do not store real secrets or production workloads there.
+
+## Layout
 
 ```
 abu-deploy/
-├── standalone/          # 单机免费部署（推荐起步）
-├── cluster/             # 小集群（1 master + N slaves + HAProxy）
-├── scripts/             # 一键启动脚本
-├── FEATURES.md          # 功能与授权对照
-└── README.md
+├── standalone/          # single-host free deploy (start here)
+├── cluster/             # small cluster (1 master + 2 slaves + HAProxy)
+├── scripts/             # one-shot helpers
+├── FEATURES.md          # plans & assisted-deploy fee (zh)
+├── README.md            # English
+└── README.zh-CN.md      # Simplified Chinese
 ```
 
-## 要求
+## Requirements
 
-- Docker Engine 24+ 与 Docker Compose v2
-- 单机：约 2 CPU / 4 GB RAM（SQLite + Redis）
-- 小集群：外部 MySQL，建议 4 CPU / 8 GB+ RAM；多实例容量受授权约束
+- Docker Engine 24+ and Docker Compose v2
+- Standalone: ~2 CPU / 4 GB RAM (SQLite + Redis)
+- Small cluster: external MySQL; ~4 CPU / 8 GB+ RAM recommended; multi-instance capacity follows your license
 
-默认镜像：`abu116/abu-api:latest`
+Default image: `abu116/abu-api:latest`
 
-## 单机免费部署
+## Standalone (free)
 
 ```bash
 git clone https://github.com/BeyondYang117/abu-deploy.git
 cd abu-deploy/standalone
 cp .env.example .env
-# 至少修改 REDIS_PASSWORD / SESSION_SECRET / CRYPTO_SECRET / CARD_ENCRYPTION_KEY
+# set REDIS_PASSWORD / SESSION_SECRET / CRYPTO_SECRET / CARD_ENCRYPTION_KEY
 docker compose up -d
 curl http://127.0.0.1:3004/ready
 ```
 
-或：
+Or:
 
 ```bash
 ./scripts/deploy-standalone.sh
 ```
 
-默认使用 SQLite（`SQL_DSN=local`）。`LICENSE_CODE` 可留空。
+Defaults to SQLite (`SQL_DSN=local`). `LICENSE_CODE` may be left empty.
 
-访问入口：`http://127.0.0.1:3004`（仅本机；生产请加反向代理）。
+Entrypoint: `http://127.0.0.1:3004` (loopback only — put a reverse proxy in front for production).
 
-## 小集群部署
+## Small cluster
 
-适合团队版 / 需要多实例的场景。模板在单机拉起 master + slaves + Redis + HAProxy；**MySQL 需自备**。
+For Team plans / multi-instance. One host runs master + slaves + Redis + HAProxy; **bring your own MySQL**.
 
 ```bash
 cd abu-deploy/cluster
 cp .env.example .env
-# 配置 SQL_DSN、密钥；按需填写 LICENSE_CODE（团队/企业）
-# 首次可先迁移：
+# set SQL_DSN, secrets; set LICENSE_CODE for Team / Enterprise as needed
+# first-time migrate (optional):
 #   RUN_MIGRATE=1 ../scripts/deploy-cluster.sh
 docker compose up -d
 curl http://127.0.0.1:8004/ready
 ```
 
-或：
+Or:
 
 ```bash
 RUN_MIGRATE=1 ./scripts/deploy-cluster.sh
 ```
 
-默认固定 2 个 slave（`abu-api-slave-1/2`），与 `haproxy.cfg` 对齐。若增减节点，请同时改 compose 服务与 HAProxy 后端。
+Two fixed slaves (`abu-api-slave-1/2`) match `haproxy.cfg`. If you add/remove nodes, update both Compose and HAProxy.
 
-> 个人版面向单实例；小集群模板公开可部署，实际可运行实例数以授权为准。
+> Personal is single-instance oriented. Cluster templates are public; runnable instance count follows your license.
 
-## 功能与授权
+## Plans & licensing
 
-试运行友情价，方便先用起来；正式定价可能调整，以 [授权门户](https://www.abuai.chat/) 为准。
+Soft-launch / trial pricing — subject to change; see the [license portal](https://www.abuai.chat/).
 
-| 版本 | 定位 | 部署模板 |
-|------|------|----------|
-| 个人版 | 永久免费；3 用户 / 5 渠道 / 10 令牌 / 1 实例 | `standalone/` |
-| 基础团队 | ¥9.9/月；10 用户 / 20 渠道 / 3 实例 | `standalone/` + `cluster/` |
-| 标准团队 | ¥29.9/月；20 用户 / 50 渠道 / 5 实例 | `standalone/` + `cluster/` |
-| 高级团队 | ¥59.9/月；50 用户 / 100 渠道 / 10 实例 | `standalone/` + `cluster/` |
-| 企业版 | 无限额度、SLA、定制与私有化 | 联系销售 |
+| Plan | Limits | Templates |
+|------|--------|-----------|
+| Personal | Free forever; 3 users / 5 channels / 10 tokens / 1 instance | `standalone/` |
+| Team Basic | ¥9.9/mo; 10 users / 20 channels / 3 instances | `standalone/` + `cluster/` |
+| Team Standard | ¥29.9/mo; 20 users / 50 channels / 5 instances | `standalone/` + `cluster/` |
+| Team Pro | ¥59.9/mo; 50 users / 100 channels / 10 instances | `standalone/` + `cluster/` |
+| Enterprise | Unlimited limits, SLA, custom & private deploy | Contact sales |
 
-需要我们帮忙部署上线：**代部署服务费 ¥100 / 次**（一次性）。详见 [FEATURES.md](./FEATURES.md)。
+Need help standing it up? **Assisted deploy: ¥100 one-time.** Details in [FEATURES.md](./FEATURES.md).
 
-## 常用命令
+## Common commands
 
 ```bash
-# 单机
+# standalone
 cd standalone && docker compose ps && docker compose logs -f abu-api
 
-# 小集群
+# cluster
 cd cluster && docker compose ps && docker compose logs -f master
 
-# 指定镜像版本
+# pin an image tag
 ABU_API_IMAGE=abu116/abu-api:vX.Y.Z docker compose up -d
 ```
 
-## 安全建议
+## Security
 
-- 首次启动前务必替换 `.env` 中所有 `CHANGE_ME_*`
-- 不要将 `.env` 提交到 Git
-- 生产环境用 Nginx / Caddy 终止 TLS，再反代到本机端口
-- 升级前备份数据卷与数据库
+- Replace every `CHANGE_ME_*` in `.env` before first use
+- Never commit `.env`
+- Terminate TLS with Nginx / Caddy and reverse-proxy to the local port
+- Back up volumes and the database before upgrades
 
-## 与私有主仓的关系
+## Relation to the private app repo
 
-- `abu-api`：产品源码（私有）
-- `abu-deploy`：公开部署入口（本仓库）
-- 镜像由官方构建并推送到公共 Registry；本仓库只消费镜像 tag
+- `abu-api`: product source (private)
+- `abu-deploy`: public deploy entry (this repo)
+- Images are built and published by the project; this repo only consumes image tags
 
 ## License
 
-部署模板与脚本以 [Apache License 2.0](./LICENSE) 开源。  
-Abu API 应用镜像的使用受产品授权条款约束；免费个人版可直接部署，高级能力需另行授权。
+Deploy templates and scripts are [Apache License 2.0](./LICENSE).  
+Use of the Abu API application image is subject to product licensing — free Personal deploy is allowed; higher tiers require a license upgrade.

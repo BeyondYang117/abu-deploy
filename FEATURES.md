@@ -1,5 +1,7 @@
 # 功能与授权
 
+> Docs: [English README](./README.md) · [简体中文 README](./README.zh-CN.md)
+
 镜像可公开拉取并免费部署。`LICENSE_CODE` 留空时使用内置免费授权（个人版）；需要更高额度或企业能力时，再申请升级授权。
 
 授权门户：[https://www.abuai.chat/](https://www.abuai.chat/)
