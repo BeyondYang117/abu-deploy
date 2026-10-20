@@ -29,6 +29,8 @@ abu-deploy/
 │   ├── mysql/           # single-host + MySQL 8
 │   └── postgres/        # single-host + PostgreSQL 16
 ├── scripts/             # one-shot helpers
+├── releases/            # per-version upgrade notes (operators)
+├── UPGRADE.md           # upgrade entry
 ├── FEATURES.md          # plans & assisted-deploy fee (zh)
 ├── README.md            # English
 └── README.zh-CN.md      # Simplified Chinese
@@ -158,6 +160,12 @@ ABU_API_IMAGE=abu116/abu-api:vX.Y.Z docker compose up -d
 ABU_API_IMAGE=abu116/abu-api-team:vX.Y.Z docker compose up -d
 ```
 
+## Upgrades
+
+Read **[UPGRADE.md](./UPGRADE.md)** first, then follow the target version under [`releases/`](./releases/). Pin `ABU_API_IMAGE` to an explicit tag (e.g. `abu116/abu-api-team:v1.0.0`) and back up data before upgrading.
+
+Current release: [v1.0.0](./releases/v1.0.0.md)
+
 ## Security
 
 - Replace every `CHANGE_ME_*` in `.env` before first use
@@ -167,8 +175,8 @@ ABU_API_IMAGE=abu116/abu-api-team:vX.Y.Z docker compose up -d
 
 ## Relation to the private app repo
 
-- `abu-api`: product source (private)
-- `abu-deploy`: public deploy entry (this repo)
+- `abu-api`: product source (private); canonical release notes embedded in the app
+- `abu-deploy`: public deploy entry (this repo); operator-facing upgrade notes synced here
 - Images are built and published by the project; this repo only consumes image tags
 
 ## License

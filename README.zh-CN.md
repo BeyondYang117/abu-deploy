@@ -29,6 +29,8 @@ abu-deploy/
 │   ├── mysql/           # 单机 + MySQL 8
 │   └── postgres/        # 单机 + PostgreSQL 16
 ├── scripts/             # 一键启动脚本
+├── releases/            # 各版本升级说明（运维向）
+├── UPGRADE.md           # 升级入口
 ├── FEATURES.md          # 功能与授权对照
 ├── README.md            # English
 └── README.zh-CN.md      # 简体中文
@@ -158,6 +160,12 @@ ABU_API_IMAGE=abu116/abu-api:vX.Y.Z docker compose up -d
 ABU_API_IMAGE=abu116/abu-api-team:vX.Y.Z docker compose up -d
 ```
 
+## 升级
+
+请先阅读 **[UPGRADE.md](./UPGRADE.md)**，再按 [`releases/`](./releases/) 中目标版本操作。推荐将 `ABU_API_IMAGE` 钉在明确 tag（如 `abu116/abu-api-team:v1.0.0`），升级前备份数据。
+
+当前正式版本：[v1.0.0](./releases/v1.0.0.md)
+
 ## 安全建议
 
 - 首次启动前务必替换 `.env` 中所有 `CHANGE_ME_*`
@@ -167,8 +175,8 @@ ABU_API_IMAGE=abu116/abu-api-team:vX.Y.Z docker compose up -d
 
 ## 与私有主仓的关系
 
-- `abu-api`：产品源码（私有）
-- `abu-deploy`：公开部署入口（本仓库）
+- `abu-api`：产品源码（私有）；发版说明权威源并嵌入应用
+- `abu-deploy`：公开部署入口（本仓库）；同步运维向升级说明
 - 镜像由官方构建并推送到公共 Registry；本仓库只消费镜像 tag
 
 ## License
